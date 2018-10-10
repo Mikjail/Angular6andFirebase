@@ -1,42 +1,34 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import {  Subscription } from 'rxjs';
-
+import { Component, OnInit } from '@angular/core';
 import { TrainingService } from './../training.service';
+import { NgForm } from '@angular/forms';
 import { Exercise } from './../exercise.model';
-import { UIService } from '../../auth/shared/ui.service';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+import * as fromTraining from '../training.reducer';
+import * as fromRoot from '../../app.reducer';
 
 @Component({
   selector: 'app-new-training',
   templateUrl: './new-training.component.html',
   styleUrls: ['./new-training.component.css']
 })
-export class NewTrainingComponent implements OnInit, OnDestroy {
-  exercises: Exercise[];
-  exerciseSubscriptions: Subscription[] = [];
-  isLoading = true;
+export class NewTrainingComponent implements OnInit {
+  exercises$: Observable<Exercise[]>;
+  isLoading$: Observable<Boolean>;
 
-  constructor(private trainingService: TrainingService, private uiService: UIService) { }
+  constructor(private trainingService: TrainingService,
+    private store: Store<fromTraining.State>) { }
 
   ngOnInit() {
-    console.log(this.isLoading);
-    this.exerciseSubscriptions.push(this.uiService.loadingStateChanged.subscribe(isLoadingState => {
-      console.log(isLoadingState);
-      this.isLoading = isLoadingState;
-    }));
-    this.exerciseSubscriptions.push(this.trainingService.exercisesChanged.subscribe(exercises => this.exercises = exercises));
+    this.isLoading$ = this.store.select(fromRoot.getIsLoading);
+    this.exercises$ = this.store.select(fromTraining.getAvailableExercices);
     this.trainingService.fetchAvailableExercises();
   }
+
   fetchExercises() {
     this.trainingService.fetchAvailableExercises();
   }
   onStartTraining(form: NgForm) {
     this.trainingService.startExcercise(form.value.exercise);
-  }
-
-  ngOnDestroy() {
-    if (this.exerciseSubscriptions.length > 0 ) {
-      this.exerciseSubscriptions.forEach(element => element.unsubscribe() );
-    }
   }
 }

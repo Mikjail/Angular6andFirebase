@@ -11,13 +11,14 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { AppRoutingModule} from './app-routing.module';
 import { HeaderComponent } from './navigation/header/header.component';
 import { SidenavListComponent } from './navigation/sidenav-list/sidenav-list.component';
-
+import { StoreModule } from '@ngrx/store';
 
 import { TrainingService } from './training/training.service';
-import { UIService } from './auth/shared/ui.service';
+import { UIService } from './shared/ui.service';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { environment } from '../environments/environment';
+import { reducers } from './app.reducer';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { environment } from '../environments/environment';
     FlexLayoutModule,
     AngularFirestoreModule,
     AngularFireModule.initializeApp(environment.firebase),
+    StoreModule.forRoot(reducers),
     AuthModule
   ],
   providers: [AuthService, TrainingService, UIService],
